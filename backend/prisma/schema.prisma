@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  name          String
+  email         String          @unique
+  password_hash String
+  role          String          @default("Coordinator")
+  created_at    DateTime        @default(now())
+  
+  staffDetails  StaffDetails?
+  tasks         Task[]          @relation("AssignedStaff")
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+}
+
+
+model StaffDetails {
+  id                  Int      @id @default(autoincrement())
+  user_id             Int      @unique
+  phone               String?
+  availability_status String   @default("Available")
+  current_location    String?
+  
+  user                User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Customer {
+  id         Int      @id @default(autoincrement())
+  name       String
+  phone      String
+  email      String?
+  address    String
+  created_at DateTime @default(now())
+  
+  tasks      Task[]
+}
+
+model Device {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  category            String
+  serial_number       String   @unique
+  rental_price        Float    @default(0.0)
+  availability_status String   @default("Available") // Available, Rented, Maintenance
+  condition           String   @default("Good")
+  created_at          DateTime @default(now())
+  
+  tasks               Task[]
+}
+
+model Task {
+  id                Int       @id @default(autoincrement())
+  type              String
+  status            String    @default("Pending")
+  priority          String    @default("Medium")
+  scheduled_time    DateTime
+  actual_time       DateTime?
+  location_address  String
+  notes             String?
+  
+  customer_id       Int
+  device_id         Int
+  assigned_staff_id Int?
+  
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  customer          Customer  @relation(fields: [customer_id], references: [id])
+  device            Device    @relation(fields: [device_id], references: [id])
+  assigned_staff    User?     @relation("AssignedStaff", fields: [assigned_staff_id], references: [id])
+}
+
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  type       String
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  action      String
+  entity_type String
+  entity_id   Int
+  timestamp   DateTime @default(now())
+
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
