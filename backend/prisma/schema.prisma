@@ -57,25 +57,27 @@ model Device {
 }
 
 model Task {
-  id                Int       @id @default(autoincrement())
-  type              String
-  status            String    @default("Pending")
-  priority          String    @default("Medium")
-  scheduled_time    DateTime
-  actual_time       DateTime?
-  location_address  String
-  notes             String?
+  id                     Int       @id @default(autoincrement())
+  type                   String
+  status                 String    @default("Pending")
+  priority               String    @default("Medium")
+  scheduled_time         DateTime
+  actual_time            DateTime?
+  estimated_duration_mins Int      @default(60)
+  reminder_at            DateTime?
+  location_address       String
+  notes                  String?
   
-  customer_id       Int
-  device_id         Int
-  assigned_staff_id Int?
+  customer_id            Int
+  device_id              Int
+  assigned_staff_id      Int?
   
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
 
-  customer          Customer  @relation(fields: [customer_id], references: [id])
-  device            Device    @relation(fields: [device_id], references: [id])
-  assigned_staff    User?     @relation("AssignedStaff", fields: [assigned_staff_id], references: [id])
+  customer               Customer  @relation(fields: [customer_id], references: [id])
+  device                 Device    @relation(fields: [device_id], references: [id])
+  assigned_staff         User?     @relation("AssignedStaff", fields: [assigned_staff_id], references: [id])
 }
 
 
