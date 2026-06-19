@@ -56,18 +56,21 @@ router.put('/:id', async (req, res) => {
 // Delete a customer
 router.delete('/:id', async (req, res) => {
   try {
-    // Check if customer has tasks
-    const tasks = await prisma.task.findMany({
-      where: { customer_id: parseInt(req.params.id) }
+    const customerId = parseInt(req.params.id);
+    
+    // Delete all tasks associated with the customer first
+    await prisma.task.deleteMany({
+      where: { customer_id: customerId }
     });
-    if (tasks.length > 0) {
-      return res.status(400).json({ error: 'Cannot delete customer with existing tasks. Delete their tasks first.' });
-    }
+
+    // Delete the customer
     await prisma.customer.delete({
-      where: { id: parseInt(req.params.id) }
+      where: { id: customerId }
     });
+    
     res.status(204).send();
   } catch (error) {
+    console.error('Delete customer error:', error);
     res.status(500).json({ error: 'Failed to delete customer' });
   }
 });
