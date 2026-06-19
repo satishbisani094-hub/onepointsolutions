@@ -158,12 +158,24 @@ const Tasks = () => {
   const [formType, setFormType] = useState('Delivery');
   const [formCustomerId, setFormCustomerId] = useState('');
   const [formDeviceId, setFormDeviceId] = useState('');
+  const [deviceSearchText, setDeviceSearchText] = useState('');
+  const [isDeviceDropdownOpen, setIsDeviceDropdownOpen] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState(null);
   const [formPriority, setFormPriority] = useState('Medium');
   const [formScheduledTime, setFormScheduledTime] = useState('');
   const [formDuration, setFormDuration] = useState('60');
   const [formLocation, setFormLocation] = useState('');
   const [formStaffId, setFormStaffId] = useState('auto'); // 'auto' or ID
   const [formNotes, setFormNotes] = useState('');
+
+  // Set formDeviceId whenever selectedDevice changes
+  useEffect(() => {
+    if (selectedDevice) {
+      setFormDeviceId(selectedDevice.isNew ? 'new' : selectedDevice.id.toString());
+    } else {
+      setFormDeviceId('');
+    }
+  }, [selectedDevice]);
 
   // Clash states
   const [clashWarning, setClashWarning] = useState(null);
@@ -228,11 +240,58 @@ const Tasks = () => {
     checkClashRealtime();
   }, [formStaffId, formScheduledTime, formDuration, staffs]);
 
+  const handleDeviceSelect = (d) => {
+    setSelectedDevice(d);
+    setDeviceSearchText(d.name);
+    setIsDeviceDropdownOpen(false);
+  };
+
+  const handleAddCustomDevice = (name) => {
+    setSelectedDevice({ isNew: true, name });
+    setDeviceSearchText(name);
+    setIsDeviceDropdownOpen(false);
+  };
+
+  const handleDeviceDropdownClose = () => {
+    setIsDeviceDropdownOpen(false);
+    const trimmed = deviceSearchText.trim();
+    if (!trimmed) {
+      setSelectedDevice(null);
+      return;
+    }
+    
+    // Check if exactly matches an existing device name
+    const match = devices.find(d => d.name.toLowerCase() === trimmed.toLowerCase());
+    if (match) {
+      setSelectedDevice(match);
+      setDeviceSearchText(match.name);
+    } else {
+      setSelectedDevice({ isNew: true, name: trimmed });
+    }
+  };
+
+  const handleDeviceKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const trimmed = deviceSearchText.trim();
+      if (trimmed) {
+        const match = devices.find(d => d.name.toLowerCase() === trimmed.toLowerCase());
+        if (match) {
+          handleDeviceSelect(match);
+        } else {
+          handleAddCustomDevice(trimmed);
+        }
+      }
+    }
+  };
+
   const openCreateModal = () => {
     setEditingTask(null);
     setFormType('Delivery');
     setFormCustomerId(customers[0]?.id || '');
-    setFormDeviceId(devices[0]?.id || '');
+    setFormDeviceId('');
+    setDeviceSearchText('');
+    setSelectedDevice(null);
     setFormPriority('Medium');
     // Default scheduled time to tomorrow same hour rounded
     const tomorrow = new Date();
@@ -253,6 +312,14 @@ const Tasks = () => {
     setFormType(task.type);
     setFormCustomerId(task.customer_id.toString());
     setFormDeviceId(task.device_id.toString());
+    const dev = devices.find(d => d.id === task.device_id) || task.device;
+    if (dev) {
+      setSelectedDevice(dev);
+      setDeviceSearchText(dev.name);
+    } else {
+      setSelectedDevice(null);
+      setDeviceSearchText('');
+    }
     setFormPriority(task.priority);
     // Convert to local datetime string format required by input
     const localTime = new Date(task.scheduled_time);
@@ -291,15 +358,40 @@ const Tasks = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formCustomerId || !formDeviceId || !formScheduledTime || !formLocation) {
+    if (!formCustomerId || (!selectedDevice && !deviceSearchText.trim()) || !formScheduledTime || !formLocation) {
       showToast('Please fill out all required fields', 'warning');
       return;
+    }
+
+    let finalDeviceId = selectedDevice && !selectedDevice.isNew ? selectedDevice.id : null;
+
+    if (!finalDeviceId) {
+      const deviceName = selectedDevice?.name || deviceSearchText.trim();
+      try {
+        // Create new device on the fly
+        const sn = `SN-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const deviceRes = await api.post('/devices', {
+          name: deviceName,
+          category: 'General',
+          serial_number: sn,
+          rental_price: 100.0,
+          availability_status: 'Available',
+          condition: 'Excellent'
+        });
+        finalDeviceId = deviceRes.data.id;
+        
+        // Add to local state
+        setDevices(prev => [...prev, deviceRes.data]);
+      } catch (error) {
+        showToast('Failed to create custom device', 'error');
+        return;
+      }
     }
 
     const payload = {
       type: formType,
       customer_id: parseInt(formCustomerId),
-      device_id: parseInt(formDeviceId),
+      device_id: finalDeviceId,
       priority: formPriority,
       scheduled_time: new Date(formScheduledTime).toISOString(),
       estimated_duration_mins: parseInt(formDuration),
@@ -324,14 +416,12 @@ const Tasks = () => {
     }
   };
 
-  // Filter devices based on status. For delivery, prefer Available.
+  // Filter devices based on search text
   const filteredDevicesForForm = devices.filter(d => {
-    if (editingTask && d.id === editingTask.device_id) return true; // keep current device
-    if (formType === 'Delivery') {
-      return d.availability_status === 'Available';
-    }
-    return true;
+    return d.name.toLowerCase().includes(deviceSearchText.toLowerCase());
   });
+
+  const exactDeviceMatchExists = devices.some(d => d.name.toLowerCase() === deviceSearchText.toLowerCase().trim());
 
   return (
     <div className="h-full flex flex-col">
@@ -591,23 +681,98 @@ const Tasks = () => {
             </select>
           </div>
 
-          <div>
+          <div className="relative">
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Device *</label>
-            <select
-              value={formDeviceId}
-              onChange={(e) => setFormDeviceId(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              required
-            >
-              <option value="" disabled>Select Device</option>
-              {filteredDevicesForForm.map(d => (
-                <option key={d.id} value={d.id}>
-                  [{d.category}] {d.name} ({d.availability_status})
-                </option>
-              ))}
-            </select>
-            {formType === 'Delivery' && filteredDevicesForForm.length === 0 && (
-              <span className="text-[10px] text-rose-500 mt-1 block">⚠️ No available devices in stock!</span>
+            <div className="relative">
+              <input
+                type="text"
+                value={deviceSearchText}
+                onChange={(e) => {
+                  setDeviceSearchText(e.target.value);
+                  setIsDeviceDropdownOpen(true);
+                  setSelectedDevice(null);
+                }}
+                onFocus={() => setIsDeviceDropdownOpen(true)}
+                onKeyDown={handleDeviceKeyDown}
+                placeholder="Search or type any device name..."
+                className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                required
+              />
+              {deviceSearchText && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeviceSearchText('');
+                    setSelectedDevice(null);
+                    setIsDeviceDropdownOpen(true);
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+                >
+                  <FiX size={14} />
+                </button>
+              )}
+            </div>
+            
+            {isDeviceDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => handleDeviceDropdownClose()} />
+                <ul className="absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-20 divide-y divide-slate-100 dark:divide-slate-700/50">
+                  {filteredDevicesForForm.map(d => (
+                    <li
+                      key={d.id}
+                      onClick={() => handleDeviceSelect(d)}
+                      className="px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer flex justify-between items-center transition-colors"
+                    >
+                      <div>
+                        <span className="font-medium text-slate-800 dark:text-slate-150">{d.name}</span>
+                        <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded ml-2 uppercase font-semibold">
+                          {d.category}
+                        </span>
+                      </div>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        d.availability_status === 'Available'
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+                          : 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
+                      }`}>
+                        {d.availability_status}
+                      </span>
+                    </li>
+                  ))}
+                  
+                  {deviceSearchText.trim() && !exactDeviceMatchExists && (
+                    <li
+                      onClick={() => handleAddCustomDevice(deviceSearchText.trim())}
+                      className="px-3 py-2.5 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/20 font-semibold cursor-pointer flex items-center transition-colors border-t border-slate-100 dark:border-slate-700"
+                    >
+                      <FiPlus className="mr-2 text-primary-500" /> Create Custom Device: "{deviceSearchText.trim()}"
+                    </li>
+                  )}
+                  
+                  {filteredDevicesForForm.length === 0 && !deviceSearchText.trim() && (
+                    <li className="px-3 py-4 text-xs text-center text-slate-400 dark:text-slate-500 italic">
+                      Type to search or add custom device
+                    </li>
+                  )}
+                </ul>
+              </>
+            )}
+
+            {selectedDevice && (
+              <div className="mt-1.5 flex items-center gap-1.5">
+                {selectedDevice.isNew ? (
+                  <span className="text-[10px] font-semibold bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-900/50 flex items-center">
+                    ✨ New Device (Will be auto-created)
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
+                    ✓ Existing Device
+                  </span>
+                )}
+              </div>
+            )}
+            
+            {filteredDevicesForForm.length === 0 && deviceSearchText.trim() === '' && (
+              <span className="text-[10px] text-amber-500 mt-1 block">💡 No devices in stock. Type to create a custom device.</span>
             )}
           </div>
 
