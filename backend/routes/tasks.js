@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
   try {
     const { status, type, staff_id, date_from, date_to } = req.query;
     const where = {};
-    
+
     if (status) where.status = status;
     if (type) where.type = type;
     if (staff_id) where.assigned_staff_id = parseInt(staff_id);
@@ -69,7 +69,7 @@ router.get('/conflicts', async (req, res) => {
           const t2 = staffTasks[j];
           const durationMs = (t1.estimated_duration_mins || 60) * 60 * 1000;
           const diffMs = Math.abs(new Date(t1.scheduled_time) - new Date(t2.scheduled_time));
-          
+
           if (diffMs < durationMs) {
             conflicts.push({
               staff: t1.assigned_staff.name,
@@ -184,7 +184,7 @@ router.post('/', async (req, res) => {
 
     // Determine staff - auto-assign if not provided
     let finalStaffId = assigned_staff_id ? parseInt(assigned_staff_id) : null;
-    
+
     if (!finalStaffId) {
       // Auto-assign to least loaded available staff
       const availableStaff = await prisma.user.findMany({
@@ -196,7 +196,7 @@ router.post('/', async (req, res) => {
           tasks: { where: { status: { in: ['Pending', 'Assigned', 'InProgress'] } } }
         }
       });
-      
+
       if (availableStaff.length > 0) {
         availableStaff.sort((a, b) => (a.tasks?.length || 0) - (b.tasks?.length || 0));
         finalStaffId = availableStaff[0].id;
@@ -264,7 +264,7 @@ router.put('/:id', async (req, res) => {
   try {
     const { type, priority, scheduled_time, location_address, customer_id, device_id, assigned_staff_id, notes, estimated_duration_mins } = req.body;
     const data = {};
-    
+
     if (type) data.type = type;
     if (priority) data.priority = priority;
     if (scheduled_time) data.scheduled_time = new Date(scheduled_time);
@@ -301,7 +301,7 @@ router.put('/:id/status', async (req, res) => {
 
     const updatedTask = await prisma.task.update({
       where: { id: taskId },
-      data: { 
+      data: {
         status,
         actual_time: status === 'Completed' ? new Date() : undefined
       },
@@ -349,7 +349,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const taskId = parseInt(req.params.id);
     const task = await prisma.task.findUnique({ where: { id: taskId } });
-    
+
     // If device was rented for this task, set back to available
     if (task && task.type === 'Delivery' && task.status !== 'Completed') {
       await prisma.device.update({

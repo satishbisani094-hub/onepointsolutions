@@ -10,20 +10,18 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
   return (
     <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 mb-3 relative group text-left">
       <div className="flex justify-between items-start mb-2">
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-          task.type === 'Delivery' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-        }`}>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${task.type === 'Delivery' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+          }`}>
           {task.type}
         </span>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-          task.priority === 'High' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400' : 
-          task.priority === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400' : 
-          'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
-        }`}>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${task.priority === 'High' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400' :
+            task.priority === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400' :
+              'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
+          }`}>
           {task.priority} Priority
         </span>
       </div>
-      
+
       <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1">
         {task.device?.name}
       </h4>
@@ -33,11 +31,11 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
 
       <div className="space-y-1.5 mt-2 border-t border-slate-100 dark:border-slate-700/50 pt-2.5">
         <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-          <FiMapPin className="mr-2 flex-shrink-0 text-slate-400" /> 
+          <FiMapPin className="mr-2 flex-shrink-0 text-slate-400" />
           <span className="truncate">{task.location_address}</span>
         </div>
         <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
-          <FiClock className="mr-2 flex-shrink-0 text-slate-400" /> 
+          <FiClock className="mr-2 flex-shrink-0 text-slate-400" />
           <span>{new Date(task.scheduled_time).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
         </div>
         {task.estimated_duration_mins && (
@@ -63,42 +61,41 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
           )}
         </div>
         <div className="relative flex items-center gap-1">
-          <button 
+          <button
             onClick={() => onEdit(task)}
             className="p-1 rounded text-slate-400 hover:text-primary-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             title="Edit Task"
           >
             <FiEdit2 size={13} />
           </button>
-          <button 
+          <button
             onClick={() => onDelete(task.id)}
             className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             title="Delete Task"
           >
             <FiTrash2 size={13} />
           </button>
-          <button 
-            onClick={() => setShowOptions(!showOptions)} 
+          <button
+            onClick={() => setShowOptions(!showOptions)}
             className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           >
             <FiMoreVertical size={13} />
           </button>
-          
+
           {showOptions && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)} />
               <div className="absolute right-0 bottom-6 mt-2 w-36 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-20 text-xs overflow-hidden">
                 <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-700 font-bold text-slate-400 bg-slate-50/50 dark:bg-slate-900/30">Set Status</div>
                 {['Pending', 'Assigned', 'InProgress', 'Completed', 'Delayed', 'Cancelled'].map((st) => (
-                  <button 
-                    key={st} 
+                  <button
+                    key={st}
                     onClick={() => {
                       onStatusChange(task.id, st);
                       setShowOptions(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
-                      task.status === st ? 'text-primary-600 font-semibold bg-primary-50/20 dark:bg-primary-950/20' : 'text-slate-650 dark:text-slate-300'
-                    }`}
+                    className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${task.status === st ? 'text-primary-600 font-semibold bg-primary-50/20 dark:bg-primary-950/20' : 'text-slate-650 dark:text-slate-300'
+                      }`}
                   >
                     {st === 'InProgress' ? 'In Progress' : st}
                   </button>
@@ -127,12 +124,12 @@ const BoardColumn = ({ title, status, tasks, icon, colorClass, onEdit, onDelete,
     </div>
     <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
       {tasks.map(task => (
-        <TaskCard 
-          key={task.id} 
-          task={task} 
-          onEdit={onEdit} 
-          onDelete={onDelete} 
-          onStatusChange={onStatusChange} 
+        <TaskCard
+          key={task.id}
+          task={task}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onStatusChange={onStatusChange}
         />
       ))}
       {tasks.length === 0 && (
@@ -152,11 +149,11 @@ const Tasks = () => {
   const [conflicts, setConflicts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('board'); // 'board' or 'list'
-  
+
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
-  
+
   // Form states
   const [formType, setFormType] = useState('Delivery');
   const [formCustomerId, setFormCustomerId] = useState('');
@@ -167,10 +164,10 @@ const Tasks = () => {
   const [formLocation, setFormLocation] = useState('');
   const [formStaffId, setFormStaffId] = useState('auto'); // 'auto' or ID
   const [formNotes, setFormNotes] = useState('');
-  
+
   // Clash states
   const [clashWarning, setClashWarning] = useState(null);
-  
+
   // Toast notifications
   const [toast, setToast] = useState({ message: null, type: 'success' });
 
@@ -293,7 +290,7 @@ const Tasks = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formCustomerId || !formDeviceId || !formScheduledTime || !formLocation) {
       showToast('Please fill out all required fields', 'warning');
       return;
@@ -345,24 +342,22 @@ const Tasks = () => {
         </div>
         <div className="flex items-center gap-3">
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg flex overflow-hidden shadow-sm">
-            <button 
+            <button
               onClick={() => setViewMode('board')}
-              className={`px-3 py-2 text-sm font-medium flex items-center gap-1.5 transition-colors ${
-                viewMode === 'board' ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-              }`}
+              className={`px-3 py-2 text-sm font-medium flex items-center gap-1.5 transition-colors ${viewMode === 'board' ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                }`}
             >
               <FiGrid /> Board
             </button>
-            <button 
+            <button
               onClick={() => setViewMode('list')}
-              className={`px-3 py-2 text-sm font-medium flex items-center gap-1.5 transition-colors ${
-                viewMode === 'list' ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-              }`}
+              className={`px-3 py-2 text-sm font-medium flex items-center gap-1.5 transition-colors ${viewMode === 'list' ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                }`}
             >
               <FiList /> List
             </button>
           </div>
-          <button 
+          <button
             onClick={openCreateModal}
             className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors shadow-sm shadow-primary-500/30"
           >
@@ -390,60 +385,60 @@ const Tasks = () => {
       ) : viewMode === 'board' ? (
         /* Board view (scrollable Kanban) */
         <div className="flex gap-6 overflow-x-auto pb-4 pt-2 -mx-4 px-4 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700 select-none flex-1 min-h-0 items-stretch">
-          <BoardColumn 
-            title="Pending" 
-            status="Pending" 
-            tasks={tasks.filter(t => t.status === 'Pending')} 
+          <BoardColumn
+            title="Pending"
+            status="Pending"
+            tasks={tasks.filter(t => t.status === 'Pending')}
             icon={<FiAlertCircle className="w-4 h-4" />}
             colorClass="bg-slate-500"
             onEdit={openEditModal}
             onDelete={handleDeleteTask}
             onStatusChange={handleStatusChange}
           />
-          <BoardColumn 
-            title="Assigned" 
-            status="Assigned" 
-            tasks={tasks.filter(t => t.status === 'Assigned')} 
+          <BoardColumn
+            title="Assigned"
+            status="Assigned"
+            tasks={tasks.filter(t => t.status === 'Assigned')}
             icon={<FiPlus className="w-4 h-4" />}
             colorClass="bg-blue-500"
             onEdit={openEditModal}
             onDelete={handleDeleteTask}
             onStatusChange={handleStatusChange}
           />
-          <BoardColumn 
-            title="In Progress" 
-            status="InProgress" 
-            tasks={tasks.filter(t => t.status === 'InProgress')} 
+          <BoardColumn
+            title="In Progress"
+            status="InProgress"
+            tasks={tasks.filter(t => t.status === 'InProgress')}
             icon={<FiTruck className="w-4 h-4" />}
             colorClass="bg-purple-500"
             onEdit={openEditModal}
             onDelete={handleDeleteTask}
             onStatusChange={handleStatusChange}
           />
-          <BoardColumn 
-            title="Completed" 
-            status="Completed" 
-            tasks={tasks.filter(t => t.status === 'Completed')} 
+          <BoardColumn
+            title="Completed"
+            status="Completed"
+            tasks={tasks.filter(t => t.status === 'Completed')}
             icon={<FiCheckCircle className="w-4 h-4" />}
             colorClass="bg-emerald-500"
             onEdit={openEditModal}
             onDelete={handleDeleteTask}
             onStatusChange={handleStatusChange}
           />
-          <BoardColumn 
-            title="Delayed" 
-            status="Delayed" 
-            tasks={tasks.filter(t => t.status === 'Delayed')} 
+          <BoardColumn
+            title="Delayed"
+            status="Delayed"
+            tasks={tasks.filter(t => t.status === 'Delayed')}
             icon={<FiClock className="w-4 h-4" />}
             colorClass="bg-rose-500"
             onEdit={openEditModal}
             onDelete={handleDeleteTask}
             onStatusChange={handleStatusChange}
           />
-          <BoardColumn 
-            title="Cancelled" 
-            status="Cancelled" 
-            tasks={tasks.filter(t => t.status === 'Cancelled')} 
+          <BoardColumn
+            title="Cancelled"
+            status="Cancelled"
+            tasks={tasks.filter(t => t.status === 'Cancelled')}
             icon={<FiX className="w-4 h-4" />}
             colorClass="bg-slate-400"
             onEdit={openEditModal}
@@ -477,9 +472,8 @@ const Tasks = () => {
                   tasks.map((task) => (
                     <tr key={task.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/20">
                       <td className="p-4">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                          task.type === 'Delivery' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                        }`}>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${task.type === 'Delivery' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                          }`}>
                           {task.type}
                         </span>
                       </td>
@@ -501,15 +495,14 @@ const Tasks = () => {
                         {new Date(task.scheduled_time).toLocaleString()}
                       </td>
                       <td className="p-4 text-xs">
-                        <span className={`font-semibold ${
-                          task.priority === 'High' ? 'text-rose-500' : 
-                          task.priority === 'Medium' ? 'text-amber-500' : 
-                          'text-emerald-500'
-                        }`}>{task.priority}</span>
+                        <span className={`font-semibold ${task.priority === 'High' ? 'text-rose-500' :
+                            task.priority === 'Medium' ? 'text-amber-500' :
+                              'text-emerald-500'
+                          }`}>{task.priority}</span>
                       </td>
                       <td className="p-4">
-                        <select 
-                          value={task.status} 
+                        <select
+                          value={task.status}
                           onChange={(e) => handleStatusChange(task.id, e.target.value)}
                           className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded px-2.5 py-1 text-xs font-medium focus:ring-1 focus:ring-primary-500"
                         >
@@ -519,13 +512,13 @@ const Tasks = () => {
                         </select>
                       </td>
                       <td className="p-4 text-right flex items-center justify-end gap-2">
-                        <button 
+                        <button
                           onClick={() => openEditModal(task)}
                           className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-primary-600 transition-colors"
                         >
                           <FiEdit2 size={14} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDeleteTask(task.id)}
                           className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-rose-600 transition-colors"
                         >
@@ -542,9 +535,9 @@ const Tasks = () => {
       )}
 
       {/* Reusable Modal for Task Form */}
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         title={editingTask ? 'Edit Task Details' : 'Schedule New Logistics Task'}
       >
         <form onSubmit={handleFormSubmit} className="space-y-4 text-left">
@@ -559,8 +552,8 @@ const Tasks = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Task Type</label>
-              <select 
-                value={formType} 
+              <select
+                value={formType}
                 onChange={(e) => setFormType(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
@@ -571,8 +564,8 @@ const Tasks = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Priority</label>
-              <select 
-                value={formPriority} 
+              <select
+                value={formPriority}
                 onChange={(e) => setFormPriority(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
@@ -585,8 +578,8 @@ const Tasks = () => {
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Customer *</label>
-            <select 
-              value={formCustomerId} 
+            <select
+              value={formCustomerId}
               onChange={(e) => setFormCustomerId(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
@@ -600,8 +593,8 @@ const Tasks = () => {
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Device *</label>
-            <select 
-              value={formDeviceId} 
+            <select
+              value={formDeviceId}
               onChange={(e) => setFormDeviceId(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
@@ -621,8 +614,8 @@ const Tasks = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Scheduled Time *</label>
-              <input 
-                type="datetime-local" 
+              <input
+                type="datetime-local"
                 value={formScheduledTime}
                 onChange={(e) => setFormScheduledTime(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -631,8 +624,8 @@ const Tasks = () => {
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Est. Duration (Mins)</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={formDuration}
                 onChange={(e) => setFormDuration(e.target.value)}
                 min="10"
@@ -644,8 +637,8 @@ const Tasks = () => {
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Location Address *</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={formLocation}
               onChange={(e) => setFormLocation(e.target.value)}
               placeholder="e.g. 123 Business Rd, Building B"
@@ -656,8 +649,8 @@ const Tasks = () => {
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Staff Assignment</label>
-            <select 
-              value={formStaffId} 
+            <select
+              value={formStaffId}
               onChange={(e) => setFormStaffId(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
@@ -672,7 +665,7 @@ const Tasks = () => {
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Notes / Instructions</label>
-            <textarea 
+            <textarea
               value={formNotes}
               onChange={(e) => setFormNotes(e.target.value)}
               placeholder="Any special handling instructions..."
@@ -681,14 +674,14 @@ const Tasks = () => {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-150 dark:border-slate-700">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setIsModalOpen(false)}
               className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
               Cancel
             </button>
-            <button 
+            <button
               type="submit"
               className="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
             >
@@ -699,10 +692,10 @@ const Tasks = () => {
       </Modal>
 
       {/* Toast alert rendering */}
-      <Toast 
-        message={toast.message} 
-        type={toast.type} 
-        onClose={() => setToast({ message: null, type: 'success' })} 
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ message: null, type: 'success' })}
       />
     </div>
   );
