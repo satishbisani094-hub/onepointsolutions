@@ -100,7 +100,8 @@ const Customers = () => {
       setIsModalOpen(false);
       fetchCustomers();
     } catch (error) {
-      showToast('Failed to save customer', 'error');
+      const errMsg = error.response?.data?.details || error.response?.data?.error || 'Failed to save customer';
+      showToast(errMsg, 'error');
     }
   };
 
