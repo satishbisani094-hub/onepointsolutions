@@ -820,11 +820,15 @@ const Tasks = () => {
               className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="auto">🤖 Auto-Assign (Least Busy Available Staff)</option>
-              {staffs.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.staffDetails?.availability_status || 'Offline'})
-                </option>
-              ))}
+              {staffs.map(s => {
+                const hasOtherActiveTasks = s.tasks && s.tasks.some(t => !editingTask || t.id !== editingTask.id);
+                const status = hasOtherActiveTasks ? 'Unavailable' : (s.staffDetails?.availability_status || 'Offline');
+                return (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({status})
+                  </option>
+                );
+              })}
             </select>
           </div>
 
