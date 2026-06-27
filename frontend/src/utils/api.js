@@ -165,10 +165,16 @@ const setLocalData = (state) => {
   }
 };
 
-// Sync from npoint.io asynchronously
+// Sync from npoint.io with cache busting
 const syncFromCloud = async () => {
   try {
-    const response = await fetch(DB_URL);
+    const response = await fetch(`${DB_URL}?nocache=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
     if (response.ok) {
       const data = await response.json();
       if (data && data.users && data.tasks) {
@@ -434,7 +440,7 @@ const api = {
   },
 
   post: async (url, data) => {
-    const state = getLocalData();
+    const state = await syncFromCloud();
 
     if (url === '/auth/login') {
       const { email, password } = data;
@@ -581,7 +587,7 @@ const api = {
   },
 
   put: async (url, data) => {
-    const state = getLocalData();
+    const state = await syncFromCloud();
 
     if (url.startsWith('/tasks/') && url.endsWith('/status')) {
       const parts = url.split('/');
@@ -713,7 +719,7 @@ const api = {
   },
 
   delete: async (url) => {
-    const state = getLocalData();
+    const state = await syncFromCloud();
 
     if (url.startsWith('/tasks/')) {
       const parts = url.split('/');
