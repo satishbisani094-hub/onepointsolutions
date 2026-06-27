@@ -71,6 +71,38 @@ app.get("/", (req, res) => {
   });
 });
 
+
+app.get("/db-viewer", async (req, res) => {
+  try {
+    const users = await prisma.user.findMany();
+    const customers = await prisma.customer.findMany();
+    const devices = await prisma.device.findMany();
+    const tasks = await prisma.task.findMany({
+      include: {
+        customer: true,
+        device: true,
+        assigned_staff: true
+      }
+    });
+    const notifications = await prisma.notification.findMany();
+    const activityLogs = await prisma.activityLog.findMany();
+
+    res.json({
+      users,
+      customers,
+      devices,
+      tasks,
+      notifications,
+      activityLogs
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message
+    });
+  }
+});
+
 app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
   
