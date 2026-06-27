@@ -23,7 +23,14 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const isMatch = bcrypt.compareSync(password, user.password_hash);
+    let isMatch = false;
+    try {
+      isMatch = bcrypt.compareSync(password, user.password_hash);
+    } catch (bcryptError) {
+      console.warn('[Bcrypt Fallback] Plain-text comparison for legacy password hash:', bcryptError.message);
+      isMatch = (password === user.password_hash);
+    }
+
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
