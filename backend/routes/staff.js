@@ -1,5 +1,6 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -32,7 +33,7 @@ router.post('/', async (req, res) => {
       data: {
         name,
         email,
-        password_hash: 'defaulthash',
+        password_hash: bcrypt.hashSync('defaulthash', 10),
         role: role || 'DeliveryStaff',
         staffDetails: {
           create: {

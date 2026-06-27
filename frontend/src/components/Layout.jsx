@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiHome, FiBox, FiTruck, FiUsers, FiUser, FiBell, FiMenu, FiX, FiMoon, FiSun, FiBarChart2 } from 'react-icons/fi';
+import { FiHome, FiBox, FiTruck, FiUsers, FiUser, FiBell, FiMenu, FiX, FiMoon, FiSun, FiBarChart2, FiLogOut } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
 
@@ -10,9 +10,27 @@ const Layout = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [currentUser, setCurrentUser] = useState({ name: '', email: '', role: '' });
   const dropdownRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        setCurrentUser(JSON.parse(userStr));
+      } catch (err) {
+        console.error('Failed to parse user details', err);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -114,6 +132,17 @@ const Layout = () => {
                 );
               })}
             </nav>
+            
+            {/* Sidebar Logout Button */}
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full px-3 py-2.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors duration-200 font-medium cursor-pointer"
+              >
+                <span className="mr-3"><FiLogOut className="w-5 h-5" /></span>
+                Log Out
+              </button>
+            </div>
           </motion.aside>
         )}
       </AnimatePresence>
@@ -216,12 +245,12 @@ const Layout = () => {
             </div>
 
             <div className="flex items-center gap-3 ml-2 pl-4 border-l border-slate-200 dark:border-slate-700">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-md">
-                A
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-md uppercase">
+                {currentUser.name ? currentUser.name[0] : 'A'}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Admin User</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">admin@onepoint.com</p>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{currentUser.name || 'Admin User'}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{currentUser.email || 'admin@onepoint.com'}</p>
               </div>
             </div>
           </div>

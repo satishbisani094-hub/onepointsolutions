@@ -18,6 +18,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Import routes
+const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 const deviceRoutes = require('./routes/devices');
 const customerRoutes = require('./routes/customers');
@@ -26,14 +27,17 @@ const analyticsRoutes = require('./routes/analytics');
 const notificationRoutes = require('./routes/notifications');
 const activityLogRoutes = require('./routes/activitylog');
 
+const authMiddleware = require('./middleware/auth');
+
 // Use routes
-app.use('/api/tasks', taskRoutes);
-app.use('/api/devices', deviceRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/staff', staffRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/activity-logs', activityLogRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/tasks', authMiddleware, taskRoutes);
+app.use('/api/devices', authMiddleware, deviceRoutes);
+app.use('/api/customers', authMiddleware, customerRoutes);
+app.use('/api/staff', authMiddleware, staffRoutes);
+app.use('/api/analytics', authMiddleware, analyticsRoutes);
+app.use('/api/notifications', authMiddleware, notificationRoutes);
+app.use('/api/activity-logs', authMiddleware, activityLogRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
