@@ -32,7 +32,10 @@ const Login = () => {
       navigate('/');
     } catch (err) {
       console.error('Login error:', err);
-      const msg = err.response?.data?.error || 'Failed to connect to the server. Please try again.';
+      const data = err.response?.data;
+      const msg = data?.details 
+        ? `${data.error} (${data.details})` 
+        : (data?.error || 'Failed to connect to the server. Please try again.');
       setError(msg);
     } finally {
       setLoading(false);
