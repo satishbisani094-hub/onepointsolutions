@@ -64,6 +64,13 @@ async function checkDelayedTasks() {
   }
 }
 
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "OnePoint Solutions Backend is Running 🚀"
+  });
+});
+
 app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
   
