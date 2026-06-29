@@ -130,6 +130,21 @@ const Customers = () => {
         </button>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total customers</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{customers.length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">With active tasks</p>
+          <p className="mt-2 text-2xl font-semibold text-primary-600">{customers.filter((customer) => (customer.tasks || []).some((task) => task.status !== 'Completed' && task.status !== 'Cancelled')).length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Search matches</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-600">{filteredCustomers.length}</p>
+        </div>
+      </div>
+
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex-1 flex flex-col">
         <div className="p-4 border-b border-slate-200 dark:border-slate-700">
           <div className="relative w-full sm:max-w-md">

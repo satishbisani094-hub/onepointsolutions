@@ -5,14 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node copy-static-json.cjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.0",
     "autoprefixer": "^10.5.0",
-    "axios": "^1.17.0",
+    "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "framer-motion": "^12.40.0",
     "postcss": "^8.5.15",

@@ -91,6 +91,21 @@ const Notifications = () => {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total alerts</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{notifications.length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Unread</p>
+          <p className="mt-2 text-2xl font-semibold text-primary-600">{notifications.filter((notification) => !notification.is_read).length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Read</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-600">{notifications.filter((notification) => notification.is_read).length}</p>
+        </div>
+      </div>
+
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex-1">
         <div className="h-full overflow-y-auto p-2">
           {loading ? (

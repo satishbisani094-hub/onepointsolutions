@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { FiBarChart2, FiDownload, FiCheckCircle, FiClock, FiCpu, FiUsers } from 'react-icons/fi';
+import { FiBarChart2, FiDownload, FiCheckCircle, FiClock, FiCpu, FiPrinter, FiUsers } from 'react-icons/fi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 
 const Reports = () => {
@@ -34,6 +34,27 @@ const Reports = () => {
     { name: 'Maintenance', value: data.deviceUtilization.maintenance, color: '#f59e0b' }
   ].filter(d => d.value > 0);
 
+  const exportCsv = () => {
+    const rows = [
+      ['Metric', 'Value'],
+      ['On-time delivery rate', `${data.onTimeRate}%`],
+      ['Active rentals', data.deviceUtilization.rented],
+      ['Delayed tasks', data.summary.delayedTasks],
+      ['Total deliveries', data.summary.totalDeliveries],
+      ['Active pickups', data.summary.activePickups],
+      ['Completed today', data.summary.completedToday]
+    ];
+
+    const csvContent = rows.map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'onepoint-solutions-report.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -44,12 +65,20 @@ const Reports = () => {
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Deep dive into logistics performance and utilization metrics.</p>
         </div>
-        <button 
-          onClick={() => window.print()}
-          className="bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors shadow-sm"
-        >
-          <FiDownload className="mr-2" /> Export PDF
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={exportCsv}
+            className="bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors shadow-sm"
+          >
+            <FiDownload className="mr-2" /> Export CSV
+          </button>
+          <button
+            onClick={() => window.print()}
+            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors shadow-sm"
+          >
+            <FiPrinter className="mr-2" /> Export PDF
+          </button>
+        </div>
       </div>
 
       {loading ? (

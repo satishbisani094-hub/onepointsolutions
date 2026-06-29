@@ -203,6 +203,25 @@ const Staff = () => {
         </button>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Staff members</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{staffList.length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Available</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-600">{staffList.filter((staff) => (staff.staffDetails?.availability_status || 'Available') === 'Available').length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">On duty</p>
+          <p className="mt-2 text-2xl font-semibold text-blue-600">{staffList.filter((staff) => (staff.staffDetails?.availability_status || 'Available') === 'On Duty').length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Active tasks</p>
+          <p className="mt-2 text-2xl font-semibold text-primary-600">{staffList.reduce((total, staff) => total + (staff.tasks?.length || 0), 0)}</p>
+        </div>
+      </div>
+
       {loading ? (
         <div className="text-center p-8 text-slate-500">Loading staff data...</div>
       ) : (

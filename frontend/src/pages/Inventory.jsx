@@ -145,6 +145,25 @@ const Inventory = () => {
         </button>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total devices</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{inventory.length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Available</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-600">{inventory.filter((item) => item.availability_status === 'Available').length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Rented</p>
+          <p className="mt-2 text-2xl font-semibold text-blue-600">{inventory.filter((item) => item.availability_status === 'Rented').length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Maintenance</p>
+          <p className="mt-2 text-2xl font-semibold text-amber-600">{inventory.filter((item) => item.availability_status === 'Maintenance').length}</p>
+        </div>
+      </div>
+
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         {/* Search & Filter Trigger */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between gap-4">

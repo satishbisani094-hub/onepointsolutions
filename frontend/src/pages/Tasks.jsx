@@ -456,6 +456,25 @@ const Tasks = () => {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total tasks</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{tasks.length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pending</p>
+          <p className="mt-2 text-2xl font-semibold text-amber-600">{tasks.filter((t) => t.status === 'Pending').length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">In progress</p>
+          <p className="mt-2 text-2xl font-semibold text-purple-600">{tasks.filter((t) => t.status === 'InProgress').length}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Conflicts</p>
+          <p className="mt-2 text-2xl font-semibold text-rose-600">{conflicts.length}</p>
+        </div>
+      </div>
+
       {/* Schedule Conflicts Alerts */}
       {conflicts.length > 0 && (
         <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl dark:bg-amber-950/20 dark:border-amber-900/50">

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 const { PrismaClient } = require('@prisma/client');
 
 dotenv.config();
@@ -39,6 +40,45 @@ app.use('/api/analytics', authMiddleware, analyticsRoutes);
 app.use('/api/notifications', authMiddleware, notificationRoutes);
 app.use('/api/activity-logs', authMiddleware, activityLogRoutes);
 
+const clientBuildPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(clientBuildPath));
+
+app.get('/api/db-viewer', async (req, res) => {
+  try {
+    const data = {
+      users: await prisma.user.count(),
+      customers: await prisma.customer.count(),
+      devices: await prisma.device.count(),
+      tasks: await prisma.task.count(),
+      notifications: await prisma.notification.count(),
+      activityLogs: await prisma.activityLog.count(),
+    };
+
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Backend is running' });
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
+
+app.get('/db-viewer', (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
+
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -63,45 +103,6 @@ async function checkDelayedTasks() {
     console.error('[Delayed Check] Error:', error.message);
   }
 }
-
-app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "OnePoint Solutions Backend is Running 🚀"
-  });
-});
-
-
-app.get("/db-viewer", async (req, res) => {
-  try {
-    const users = await prisma.user.findMany();
-    const customers = await prisma.customer.findMany();
-    const devices = await prisma.device.findMany();
-    const tasks = await prisma.task.findMany({
-      include: {
-        customer: true,
-        device: true,
-        assigned_staff: true
-      }
-    });
-    const notifications = await prisma.notification.findMany();
-    const activityLogs = await prisma.activityLog.findMany();
-
-    res.json({
-      users,
-      customers,
-      devices,
-      tasks,
-      notifications,
-      activityLogs
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      error: err.message
-    });
-  }
-});
 
 app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);

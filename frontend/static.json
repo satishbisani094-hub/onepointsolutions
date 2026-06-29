@@ -1,0 +1,11 @@
+{
+  "root": "dist",
+  "routes": [
+    {
+      "type": "rewrite",
+      "source": "/*",
+      "destination": "/index.html",
+      "status": 200
+    }
+  ]
+}

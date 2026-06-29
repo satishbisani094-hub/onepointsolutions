@@ -1,0 +1,17 @@
+services:
+  - type: static
+    name: onepointsolutions-frontend
+    env: static
+    branch: main
+    root: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: starter
+  - type: web
+    name: onepointsolutions-backend
+    env: node
+    branch: main
+    root: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: starter
