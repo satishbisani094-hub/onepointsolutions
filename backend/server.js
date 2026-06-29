@@ -2,12 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-const { PrismaClient } = require('@prisma/client');
-
+const prisma = require('./prismaClient');
 dotenv.config();
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
@@ -45,22 +43,29 @@ app.use(express.static(clientBuildPath));
 
 app.get('/api/db-viewer', async (req, res) => {
   try {
-    const data = {
-      users: await prisma.user.findMany(),
-      customers: await prisma.customer.findMany(),
-      devices: await prisma.device.findMany(),
-      tasks: await prisma.task.findMany({
+    const [users, customers, devices, tasks, notifications, activityLogs] = await Promise.all([
+      prisma.user.findMany(),
+      prisma.customer.findMany(),
+      prisma.device.findMany(),
+      prisma.task.findMany({
         include: {
           customer: true,
           device: true,
           assigned_staff: true
         }
       }),
-      notifications: await prisma.notification.findMany(),
-      activityLogs: await prisma.activityLog.findMany(),
-    };
+      prisma.notification.findMany(),
+      prisma.activityLog.findMany()
+    ]);
 
-    res.json(data);
+    res.json({
+      users,
+      customers,
+      devices,
+      tasks,
+      notifications,
+      activityLogs
+    });
   } catch (error) {
     res.status(500).json({
       error: error.message,

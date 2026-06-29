@@ -1,8 +1,7 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get all tasks with optional filters
 router.get('/', async (req, res) => {

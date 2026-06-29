@@ -55,16 +55,26 @@ const Dashboard = () => {
   });
   const [conflicts, setConflicts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingDb, setLoadingDb] = useState(true);
 
-  const fetchData = async () => {
+  const fetchMainData = async () => {
     try {
-      const [analyticsRes, conflictsRes, dbViewerRes] = await Promise.all([
+      const [analyticsRes, conflictsRes] = await Promise.all([
         api.get('/analytics/dashboard'),
-        api.get('/tasks/conflicts'),
-        axios.get(getDbViewerUrl())
+        api.get('/tasks/conflicts')
       ]);
       setData(analyticsRes.data);
       setConflicts(conflictsRes.data);
+    } catch (error) {
+      console.error('Error fetching dashboard main data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDbViewerData = async () => {
+    try {
+      const dbViewerRes = await axios.get(getDbViewerUrl());
       const dbRaw = dbViewerRes?.data || {};
       setDbData({
         users: dbRaw.users || [],
@@ -83,16 +93,21 @@ const Dashboard = () => {
         activityLogs: (dbRaw.activityLogs || []).length
       });
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('Error fetching DB viewer data:', error);
     } finally {
-      setLoading(false);
+      setLoadingDb(false);
     }
+  };
+
+  const fetchData = () => {
+    fetchMainData();
+    fetchDbViewerData();
   };
 
   useEffect(() => {
     fetchData();
     // Poll dashboard analytics every 30 seconds
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(fetchMainData, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -216,28 +231,52 @@ const Dashboard = () => {
                 <FiUser className="w-4 h-4" />
                 <span className="text-sm font-medium">Users</span>
               </div>
-              <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{dbStats.users}</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">
+                {loadingDb ? (
+                  <span className="inline-block animate-pulse w-8 h-6 bg-slate-250 dark:bg-slate-700 rounded" />
+                ) : (
+                  dbStats.users
+                )}
+              </p>
             </div>
             <div className="rounded-xl bg-slate-50 dark:bg-slate-700/40 p-4">
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                 <FiUsers className="w-4 h-4" />
                 <span className="text-sm font-medium">Customers</span>
               </div>
-              <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{dbStats.customers}</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">
+                {loadingDb ? (
+                  <span className="inline-block animate-pulse w-8 h-6 bg-slate-250 dark:bg-slate-700 rounded" />
+                ) : (
+                  dbStats.customers
+                )}
+              </p>
             </div>
             <div className="rounded-xl bg-slate-50 dark:bg-slate-700/40 p-4">
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                 <FiBox className="w-4 h-4" />
                 <span className="text-sm font-medium">Devices</span>
               </div>
-              <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{dbStats.devices}</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">
+                {loadingDb ? (
+                  <span className="inline-block animate-pulse w-8 h-6 bg-slate-250 dark:bg-slate-700 rounded" />
+                ) : (
+                  dbStats.devices
+                )}
+              </p>
             </div>
             <div className="rounded-xl bg-slate-50 dark:bg-slate-700/40 p-4">
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                 <FiClipboard className="w-4 h-4" />
                 <span className="text-sm font-medium">Tasks</span>
               </div>
-              <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{dbStats.tasks}</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">
+                {loadingDb ? (
+                  <span className="inline-block animate-pulse w-8 h-6 bg-slate-250 dark:bg-slate-700 rounded" />
+                ) : (
+                  dbStats.tasks
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -445,7 +484,13 @@ const Dashboard = () => {
             <FiDatabase className="w-5 h-5 text-primary-500" />
             <h3 className="text-lg font-bold text-slate-800 dark:text-white">Full Data Explorer</h3>
           </div>
-          <div className="space-y-6">
+          {loadingDb ? (
+            <div className="flex flex-col items-center justify-center p-12 text-slate-500 dark:text-slate-400 gap-3">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+              <p className="text-sm font-medium">Loading database explorer...</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
             <section>
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Users ({dbStats.users})</h4>
@@ -668,6 +713,7 @@ const Dashboard = () => {
               </div>
             </section>
           </div>
+          )}
         </div>
       </div>
     </div>

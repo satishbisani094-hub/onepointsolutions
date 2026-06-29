@@ -1,55 +1,131 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-
 const router = express.Router();
-const prisma = new PrismaClient();
+const prisma = require('../prismaClient');
 
 router.get('/dashboard', async (req, res) => {
   try {
-    // 1. Get total counts
-    const totalDeliveries = await prisma.task.count({ where: { type: 'Delivery' } });
-    const activePickups = await prisma.task.count({ where: { type: 'Pickup', status: { not: 'Completed' } } });
-    const delayedTasks = await prisma.task.count({ where: { status: 'Delayed' } });
-    const completedToday = await prisma.task.count({ 
-      where: { 
-        status: 'Completed',
-        updated_at: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0))
-        }
-      } 
-    });
-    const totalTasks = await prisma.task.count();
-    const pendingTasks = await prisma.task.count({ where: { status: 'Pending' } });
-    const inProgressTasks = await prisma.task.count({ where: { status: 'InProgress' } });
-
-    // 2. Get task status distribution for pie chart
-    const statuses = ['Pending', 'Assigned', 'InProgress', 'Completed', 'Delayed', 'Cancelled'];
-    const pieData = await Promise.all(statuses.map(async (status) => {
-      const count = await prisma.task.count({ where: { status } });
-      const colors = {
-        'Completed': '#10b981',
-        'InProgress': '#3b82f6',
-        'Pending': '#f59e0b',
-        'Delayed': '#ef4444',
-        'Assigned': '#8b5cf6',
-        'Cancelled': '#64748b'
-      };
-      return { name: status, value: count, color: colors[status] };
-    }));
-    const filteredPieData = pieData.filter(d => d.value > 0);
-
-    // 3. Real weekly data - get tasks from the last 7 days
     const today = new Date();
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(today.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const recentTasks = await prisma.task.findMany({
-      where: {
-        scheduled_time: { gte: sevenDaysAgo }
-      }
-    });
+    // Run all database calls in parallel to eliminate sequential roundtrip network latency
+    const [
+      totalDeliveries,
+      activePickups,
+      delayedTasks,
+      completedToday,
+      totalTasks,
+      pendingTasks,
+      inProgressTasks,
+      
+      // Pie chart status counts
+      pendingPie,
+      assignedPie,
+      inProgressPie,
+      completedPie,
+      delayedPie,
+      cancelledPie,
+      
+      // Recent tasks for weekly data
+      recentTasks,
+      
+      // Staff utilization
+      staff,
+      
+      // Device utilization
+      totalDevices,
+      rentedDevices,
+      availableDevices,
+      maintenanceDevices,
+      
+      // Completed tasks for on-time rate
+      completedTasks,
+      
+      // Latest tasks for recent activities
+      latestTasks
+    ] = await Promise.all([
+      prisma.task.count({ where: { type: 'Delivery' } }),
+      prisma.task.count({ where: { type: 'Pickup', status: { not: 'Completed' } } }),
+      prisma.task.count({ where: { status: 'Delayed' } }),
+      prisma.task.count({ 
+        where: { 
+          status: 'Completed',
+          updated_at: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0))
+          }
+        } 
+      }),
+      prisma.task.count(),
+      prisma.task.count({ where: { status: 'Pending' } }),
+      prisma.task.count({ where: { status: 'InProgress' } }),
+      
+      // Pie status counts
+      prisma.task.count({ where: { status: 'Pending' } }),
+      prisma.task.count({ where: { status: 'Assigned' } }),
+      prisma.task.count({ where: { status: 'InProgress' } }),
+      prisma.task.count({ where: { status: 'Completed' } }),
+      prisma.task.count({ where: { status: 'Delayed' } }),
+      prisma.task.count({ where: { status: 'Cancelled' } }),
+      
+      // Recent tasks from the last 7 days
+      prisma.task.findMany({
+        where: {
+          scheduled_time: { gte: sevenDaysAgo }
+        }
+      }),
+      
+      // Staff list
+      prisma.user.findMany({
+        where: { role: { in: ['DeliveryStaff', 'Coordinator'] } },
+        include: {
+          staffDetails: true,
+          tasks: {
+            where: { status: { in: ['Pending', 'Assigned', 'InProgress'] } }
+          }
+        }
+      }),
+      
+      // Device counts
+      prisma.device.count(),
+      prisma.device.count({ where: { availability_status: 'Rented' } }),
+      prisma.device.count({ where: { availability_status: 'Available' } }),
+      prisma.device.count({ where: { availability_status: 'Maintenance' } }),
+      
+      // Completed tasks for on-time delivery rate
+      prisma.task.findMany({
+        where: { status: 'Completed' }
+      }),
+      
+      // Latest tasks for recent activities
+      prisma.task.findMany({
+        take: 5,
+        orderBy: { updated_at: 'desc' },
+        include: { customer: true, assigned_staff: true }
+      })
+    ]);
 
+    // Format Task Status Distribution Pie Chart data
+    const colors = {
+      'Completed': '#10b981',
+      'InProgress': '#3b82f6',
+      'Pending': '#f59e0b',
+      'Delayed': '#ef4444',
+      'Assigned': '#8b5cf6',
+      'Cancelled': '#64748b'
+    };
+    
+    const pieData = [
+      { name: 'Pending', value: pendingPie, color: colors['Pending'] },
+      { name: 'Assigned', value: assignedPie, color: colors['Assigned'] },
+      { name: 'InProgress', value: inProgressPie, color: colors['InProgress'] },
+      { name: 'Completed', value: completedPie, color: colors['Completed'] },
+      { name: 'Delayed', value: delayedPie, color: colors['Delayed'] },
+      { name: 'Cancelled', value: cancelledPie, color: colors['Cancelled'] }
+    ];
+    const filteredPieData = pieData.filter(d => d.value > 0);
+
+    // Format Weekly data
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const weeklyData = [];
     for (let i = 6; i >= 0; i--) {
@@ -70,45 +146,21 @@ router.get('/dashboard', async (req, res) => {
       });
     }
 
-    // 4. Staff utilization
-    const staff = await prisma.user.findMany({
-      where: { role: { in: ['DeliveryStaff', 'Coordinator'] } },
-      include: {
-        staffDetails: true,
-        tasks: {
-          where: { status: { in: ['Pending', 'Assigned', 'InProgress'] } }
-        }
-      }
-    });
+    // Format Staff utilization
     const staffUtilization = staff.map(s => ({
       name: s.name,
       activeTasks: s.tasks?.length || 0,
       availability: s.staffDetails?.availability_status || 'Unknown'
     }));
 
-    // 5. Device utilization
-    const totalDevices = await prisma.device.count();
-    const rentedDevices = await prisma.device.count({ where: { availability_status: 'Rented' } });
-    const availableDevices = await prisma.device.count({ where: { availability_status: 'Available' } });
-    const maintenanceDevices = await prisma.device.count({ where: { availability_status: 'Maintenance' } });
-
-    // 6. On-time delivery rate
-    const completedTasks = await prisma.task.findMany({
-      where: { status: 'Completed' }
-    });
+    // Calculate On-time delivery rate
     const onTimeTasks = completedTasks.filter(t => {
       if (!t.actual_time) return true;
       return new Date(t.actual_time) <= new Date(new Date(t.scheduled_time).getTime() + 30 * 60000);
     });
     const onTimeRate = completedTasks.length > 0 ? Math.round((onTimeTasks.length / completedTasks.length) * 100) : 100;
 
-    // 7. Get recent activities (last 5 tasks updated)
-    const latestTasks = await prisma.task.findMany({
-      take: 5,
-      orderBy: { updated_at: 'desc' },
-      include: { customer: true, assigned_staff: true }
-    });
-
+    // Format Recent activities
     const recentActivities = latestTasks.map(t => ({
       id: t.id,
       title: `${t.type} ${t.status}`,
