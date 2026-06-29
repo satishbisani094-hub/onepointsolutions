@@ -459,19 +459,43 @@ const Tasks = () => {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total tasks</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{tasks.length}</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">
+            {loading ? (
+              <span className="inline-block animate-pulse w-12 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg mt-1" />
+            ) : (
+              tasks.length
+            )}
+          </p>
         </div>
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pending</p>
-          <p className="mt-2 text-2xl font-semibold text-amber-600">{tasks.filter((t) => t.status === 'Pending').length}</p>
+          <p className="mt-2 text-2xl font-semibold text-amber-600">
+            {loading ? (
+              <span className="inline-block animate-pulse w-12 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg mt-1" />
+            ) : (
+              tasks.filter((t) => t.status === 'Pending').length
+            )}
+          </p>
         </div>
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">In progress</p>
-          <p className="mt-2 text-2xl font-semibold text-purple-600">{tasks.filter((t) => t.status === 'InProgress').length}</p>
+          <p className="mt-2 text-2xl font-semibold text-purple-600">
+            {loading ? (
+              <span className="inline-block animate-pulse w-12 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg mt-1" />
+            ) : (
+              tasks.filter((t) => t.status === 'InProgress').length
+            )}
+          </p>
         </div>
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Conflicts</p>
-          <p className="mt-2 text-2xl font-semibold text-rose-600">{conflicts.length}</p>
+          <p className="mt-2 text-2xl font-semibold text-rose-600">
+            {loading ? (
+              <span className="inline-block animate-pulse w-12 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg mt-1" />
+            ) : (
+              conflicts.length
+            )}
+          </p>
         </div>
       </div>
 

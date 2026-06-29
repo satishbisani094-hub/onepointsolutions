@@ -133,15 +133,33 @@ const Customers = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total customers</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">{customers.length}</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-800 dark:text-white">
+            {loading ? (
+              <span className="inline-block animate-pulse w-12 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg mt-1" />
+            ) : (
+              customers.length
+            )}
+          </p>
         </div>
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">With active tasks</p>
-          <p className="mt-2 text-2xl font-semibold text-primary-600">{customers.filter((customer) => (customer.tasks || []).some((task) => task.status !== 'Completed' && task.status !== 'Cancelled')).length}</p>
+          <p className="mt-2 text-2xl font-semibold text-primary-600">
+            {loading ? (
+              <span className="inline-block animate-pulse w-12 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg mt-1" />
+            ) : (
+              customers.filter((customer) => (customer.tasks || []).some((task) => task.status !== 'Completed' && task.status !== 'Cancelled')).length
+            )}
+          </p>
         </div>
         <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Search matches</p>
-          <p className="mt-2 text-2xl font-semibold text-emerald-600">{filteredCustomers.length}</p>
+          <p className="mt-2 text-2xl font-semibold text-emerald-600">
+            {loading ? (
+              <span className="inline-block animate-pulse w-12 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg mt-1" />
+            ) : (
+              filteredCustomers.length
+            )}
+          </p>
         </div>
       </div>
 
