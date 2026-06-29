@@ -1,10 +1,19 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.MODE === "development"
+let API_BASE_URL = import.meta.env.VITE_API_URL;
+
+if (!API_BASE_URL) {
+  API_BASE_URL = import.meta.env.MODE === "development"
     ? "http://localhost:5000/api"
-    : "https://onepointsolutions.onrender.com/api");
+    : "https://onepointsolutions.onrender.com/api";
+}
+
+// Ensure the URL ends with /api
+if (API_BASE_URL && !API_BASE_URL.endsWith('/api') && !API_BASE_URL.endsWith('/api/')) {
+  API_BASE_URL = API_BASE_URL.endsWith('/') 
+    ? `${API_BASE_URL}api` 
+    : `${API_BASE_URL}/api`;
+}
 
 export const getDbViewerUrl = () => {
   return `${API_BASE_URL}/db-viewer`;

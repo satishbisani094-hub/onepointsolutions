@@ -19,15 +19,15 @@ const ProtectedRoute = () => {
     let isMounted = true;
 
     const verifySession = async () => {
-      const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-      if (!token || user.role !== 'Admin') {
-        if (isMounted) setAuthorized(false);
-        return;
-      }
-
       try {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!token || user.role !== 'Admin') {
+          if (isMounted) setAuthorized(false);
+          return;
+        }
+
         const response = await api.get('/auth/me');
         if (isMounted) {
           localStorage.setItem('user', JSON.stringify(response.data));
