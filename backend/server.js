@@ -46,12 +46,18 @@ app.use(express.static(clientBuildPath));
 app.get('/api/db-viewer', async (req, res) => {
   try {
     const data = {
-      users: await prisma.user.count(),
-      customers: await prisma.customer.count(),
-      devices: await prisma.device.count(),
-      tasks: await prisma.task.count(),
-      notifications: await prisma.notification.count(),
-      activityLogs: await prisma.activityLog.count(),
+      users: await prisma.user.findMany(),
+      customers: await prisma.customer.findMany(),
+      devices: await prisma.device.findMany(),
+      tasks: await prisma.task.findMany({
+        include: {
+          customer: true,
+          device: true,
+          assigned_staff: true
+        }
+      }),
+      notifications: await prisma.notification.findMany(),
+      activityLogs: await prisma.activityLog.findMany(),
     };
 
     res.json(data);
